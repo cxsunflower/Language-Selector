@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.LocaleList
+import android.os.Handler
+import android.os.Looper
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
@@ -20,6 +22,7 @@ class QSTile : TileService() {
 
     private var isLoaded = false
     private val locales = mutableListOf<SingleLocale>()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var targetPackage: ApplicationInfo
 
     private fun getNextSingleLocale(localeList: LocaleList): SingleLocale {
@@ -40,10 +43,27 @@ class QSTile : TileService() {
     }
 
     private fun setDisabledTile() {
-        qsTile.label = getString(R.string.app_name)
-        qsTile.subtitle = getString(R.string.unavailable)
-        qsTile.state = Tile.STATE_UNAVAILABLE
-        qsTile.updateTile()
+        postTileState(
+            label = getString(R.string.app_name),
+            subtitle = getString(R.string.unavailable),
+            state = Tile.STATE_UNAVAILABLE
+        )
+    }
+
+    private fun postTileState(label: String, subtitle: String, state: Int) {
+        val updateBlock = {
+            qsTile.label = label
+            qsTile.subtitle = subtitle
+            qsTile.state = state
+            qsTile.updateTile()
+        }
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            updateBlock()
+        } else {
+            // Tile 的 UI 状态只能在主线程更新，后台 Binder 回调里需要切回主线程。
+            mainHandler.post(updateBlock)
+        }
     }
 
     private fun updateTile() {
@@ -75,13 +95,11 @@ class QSTile : TileService() {
                 } catch (e: Exception) {
                     ""
                 }.ifBlank { getString(R.string.system_default) }
-            qsTile.state = Tile.STATE_INACTIVE
-            qsTile.updateTile()
-
-            qsTile.label = currentLocale
-            qsTile.subtitle = packageManager.getLabel(targetPackage)
-            qsTile.state = if (isCustomLocale) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-            qsTile.updateTile()
+            postTileState(
+                label = currentLocale,
+                subtitle = packageManager.getLabel(targetPackage),
+                state = if (isCustomLocale) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+            )
         }
     }
 
