@@ -1,5 +1,6 @@
 package vegabobo.languageselector.ui.screen.about
 
+import android.graphics.drawable.ColorDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,11 +22,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -34,6 +38,7 @@ import vegabobo.languageselector.ui.components.BackButton
 import vegabobo.languageselector.ui.components.Title
 import vegabobo.languageselector.ui.screen.BaseScreen
 import vegabobo.languageselector.ui.screen.main.getAppIcon
+import vegabobo.languageselector.ui.theme.LanguageSelector
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.util.withContext
 import vegabobo.languageselector.BuildConfig
@@ -49,14 +54,61 @@ fun AboutScreen(
     libs.value = Libs.Builder().withContext(context).build()
     val libraries = libs.value!!.libraries
 
+    AboutContent(
+        navigateBack = navigateBack,
+        appIcon = context.packageManager.getAppIcon(context.applicationInfo),
+        appName = stringResource(R.string.app_name),
+        versionText = stringResource(R.string.version).format(
+            BuildConfig.VERSION_NAME,
+            BuildConfig.VERSION_CODE
+        ),
+        githubTitle = stringResource(R.string.ghrepo),
+        githubDescription = stringResource(R.string.view_source),
+        libraries = libraries.map { library ->
+            AboutLibraryItem(
+                title = library.name,
+                description = library.licenses.joinToString(separator = "") { it.name },
+                url = library.website.orEmpty()
+            )
+        },
+        onOpenGithub = {
+            uriHandler.openUri("https://github.com/VegaBobo/Language-Selector")
+        },
+        onOpenLibrary = { url ->
+            if (url.isNotEmpty()) {
+                uriHandler.openUri(url)
+            }
+        }
+    )
+}
+
+data class AboutLibraryItem(
+    val title: String,
+    val description: String,
+    val url: String = ""
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutContent(
+    navigateBack: () -> Unit,
+    appIcon: android.graphics.drawable.Drawable,
+    appName: String,
+    versionText: String,
+    githubTitle: String,
+    githubDescription: String,
+    libraries: List<AboutLibraryItem>,
+    onOpenGithub: () -> Unit,
+    onOpenLibrary: (String) -> Unit,
+) {
     BaseScreen(
         title = stringResource(R.string.about),
         navIcon = { BackButton { navigateBack() } }
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = it.calculateTopPadding())
+                .padding(paddingValues)
         ) {
             item {
                 Column(
@@ -66,52 +118,58 @@ fun AboutScreen(
                 ) {
                     Image(
                         modifier = Modifier.size(96.dp),
-                        bitmap = context.packageManager
-                            .getAppIcon(context.applicationInfo)
-                            .toBitmap().asImageBitmap(),
+                        bitmap = appIcon.toBitmap().asImageBitmap(),
                         contentDescription = "App icon"
                     )
-                    Text(text = stringResource(R.string.app_name), fontSize = 22.sp)
-                    Text(
-                        stringResource(R.string.version).format(
-                            BuildConfig.VERSION_NAME,
-                            BuildConfig.VERSION_CODE
-                        )
-                    )
+                    Text(text = appName, fontSize = 22.sp)
+                    Text(versionText)
                 }
             }
             item {
                 Title(stringResource(id = R.string.app))
                 PreferenceItem(
-                    title = stringResource(R.string.ghrepo),
-                    description = stringResource(R.string.view_source)
-                ) {
-                    uriHandler.openUri("https://github.com/VegaBobo/Language-Selector")
-                }
+                    title = githubTitle,
+                    description = githubDescription,
+                    onClick = onOpenGithub
+                )
             }
             item { Title(stringResource(R.string.deps_libs)) }
             items(libraries.size) {
                 val thisLibrary = libraries[it]
-                val name = thisLibrary.name
-                var licenses = ""
-                for (license in thisLibrary.licenses) {
-                    licenses += license.name
-                }
-                val urlToOpen = thisLibrary.website ?: ""
                 PreferenceItem(
-                    title = name,
-                    description = licenses,
-                    onClick = {
-                        if (urlToOpen.isNotEmpty()) {
-                            uriHandler.openUri(urlToOpen)
-                        }
-                    },
+                    title = thisLibrary.title,
+                    description = thisLibrary.description,
+                    onClick = { onOpenLibrary(thisLibrary.url) },
                 )
             }
-            item { Spacer(modifier = Modifier.padding(bottom = it.calculateBottomPadding())) }
+            item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
         }
     }
+}
 
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun AboutScreenPreview() {
+    // 预览用静态依赖列表，覆盖应用信息与设置项排版。
+    val previewLibraries = listOf(
+        AboutLibraryItem("Shizuku", "Apache 2.0"),
+        AboutLibraryItem("Hilt", "Apache 2.0"),
+        AboutLibraryItem("Room", "Apache 2.0")
+    )
+
+    LanguageSelector(dynamicColor = false) {
+        AboutContent(
+            navigateBack = {},
+            appIcon = ColorDrawable(Color(0xFF3B826A).toArgb()),
+            appName = "Language Selector",
+            versionText = "version 1.04 (5)",
+            githubTitle = "GitHub repo",
+            githubDescription = "View source code",
+            libraries = previewLibraries,
+            onOpenGithub = {},
+            onOpenLibrary = {}
+        )
+    }
 }
 
 @Composable

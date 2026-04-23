@@ -14,10 +14,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +32,13 @@ fun AppListItem(
     app: AppInfo,
     onClickApp: (String) -> Unit
 ) {
+    val density = LocalDensity.current
+    val iconSizePx = with(density) { 32.dp.roundToPx().coerceAtLeast(1) }
+    val iconBitmap = remember(app.icon, iconSizePx) {
+        // 显式传入位图尺寸，避免 Preview 中的 ColorDrawable 因无固有宽高而崩溃。
+        app.icon.toBitmap(width = iconSizePx, height = iconSizePx).asImageBitmap()
+    }
+
     Row(
         modifier = Modifier
             .clickable { onClickApp(app.pkg) }
@@ -38,7 +47,7 @@ fun AppListItem(
     ) {
         Image(
             modifier = Modifier.size(32.dp),
-            bitmap = app.icon.toBitmap().asImageBitmap(),
+            bitmap = iconBitmap,
             contentDescription = "app icon"
         )
         Spacer(modifier = Modifier.padding(8.dp))

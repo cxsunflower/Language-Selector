@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Language Selector</string>
     <string name="app_language">App语言</string>
     <string name="system_default">系统默认</string>
     <string name="user_languages">用户语言</string>
@@ -27,4 +28,5 @@
     <string name="warning">警告</string>
     <string name="warning_system_apps">不建议对系统应用选择语言,你确定?</string>
     <string name="cancel">取消</string>
+    <string name="search">搜索应用</string>
 </resources>
