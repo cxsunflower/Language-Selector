@@ -20,7 +20,10 @@ object Destinations {
 }
 
 @Composable
-fun Navigation() {
+fun Navigation(
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
+) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -31,7 +34,9 @@ fun Navigation() {
         ) {
             MainScreen(
                 navigateToAppScreen = { navController.navigate("$APP_INFO/$it") },
-                navigateToAbout = { navController.navigate(ABOUT)}
+                navigateToAbout = { navController.navigate(ABOUT) },
+                isDarkTheme = isDarkTheme,
+                onToggleTheme = onToggleTheme,
             )
         }
 

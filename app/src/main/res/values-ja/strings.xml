@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Language Selector</string>
     <string name="app_language">アプリの言語</string>
     <string name="system_default">システムのデフォルト</string>
     <string name="user_languages">ユーザー言語:</string>
@@ -8,7 +7,13 @@
     <string name="region">地域:</string>
     <string name="all_languages">すべての言語:</string>
     <string name="show_only_user_apps">ユーザーアプリのみを表示</string>
+    <string name="show_user_apps">ユーザーアプリを表示</string>
     <string name="show_system_apps">システムアプリを表示</string>
+    <string name="user_app">ユーザーアプリ</string>
+    <string name="system_app">システムアプリ</string>
+    <string name="modified">変更済み</string>
+    <string name="switch_to_dark_theme">ダークテーマに切り替え</string>
+    <string name="switch_to_light_theme">ライトテーマに切り替え</string>
     <string name="settings">設定</string>
     <string name="open">開く</string>
     <string name="close">閉じる</string>
@@ -28,4 +33,5 @@
     <string name="warning">警告</string>
     <string name="warning_system_apps">システムアプリから言語を選択することは推奨されていません。続行しますか？</string>
     <string name="cancel">キャンセル</string>
+    <string name="search">アプリを検索</string>
 </resources>

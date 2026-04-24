@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Language Selector</string>
     <string name="app_language">Idioma do app</string>
     <string name="system_default">Padrão do sistema</string>
     <string name="user_languages">Idiomas do usuário:</string>
@@ -8,7 +7,13 @@
     <string name="region">Região:</string>
     <string name="all_languages">Todos os idiomas:</string>
     <string name="show_only_user_apps">Mostrar apenas apps do usuário</string>
+    <string name="show_user_apps">Mostrar apps do usuário</string>
     <string name="show_system_apps">Mostrar apps do sistema</string>
+    <string name="user_app">App do usuário</string>
+    <string name="system_app">App do sistema</string>
+    <string name="modified">Modificado</string>
+    <string name="switch_to_dark_theme">Alternar para tema escuro</string>
+    <string name="switch_to_light_theme">Alternar para tema claro</string>
     <string name="settings">Config.</string>
     <string name="open">Abrir</string>
     <string name="close">Fechar</string>
@@ -28,4 +33,5 @@
     <string name="warning">Aviso</string>
     <string name="warning_system_apps">Selecionar idiomas de aplicativos do sistema não é recomendado, você tem certeza?</string>
     <string name="cancel">Cancelar</string>
+    <string name="search">Pesquisar apps</string>
 </resources>

@@ -1,6 +1,7 @@
 package vegabobo.languageselector.ui.screen.about
 
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,13 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -101,6 +105,11 @@ fun AboutContent(
     onOpenGithub: () -> Unit,
     onOpenLibrary: (String) -> Unit,
 ) {
+    val appIconBitmap = rememberDrawableBitmap(
+        drawable = appIcon,
+        size = 96.dp
+    )
+
     BaseScreen(
         title = stringResource(R.string.about),
         navIcon = { BackButton { navigateBack() } }
@@ -118,7 +127,7 @@ fun AboutContent(
                 ) {
                     Image(
                         modifier = Modifier.size(96.dp),
-                        bitmap = appIcon.toBitmap().asImageBitmap(),
+                        bitmap = appIconBitmap,
                         contentDescription = "App icon"
                     )
                     Text(text = appName, fontSize = 22.sp)
@@ -144,6 +153,20 @@ fun AboutContent(
             }
             item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
         }
+    }
+}
+
+@Composable
+private fun rememberDrawableBitmap(
+    drawable: Drawable,
+    size: Dp,
+): ImageBitmap {
+    val density = LocalDensity.current
+    val sizePx = with(density) { size.roundToPx().coerceAtLeast(1) }
+
+    return remember(drawable, sizePx) {
+        // ColorDrawable 等预览图标没有固有尺寸，显式给尺寸避免 Preview 崩溃。
+        drawable.toBitmap(width = sizePx, height = sizePx).asImageBitmap()
     }
 }
 

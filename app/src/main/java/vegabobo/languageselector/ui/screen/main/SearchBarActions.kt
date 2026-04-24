@@ -1,70 +1,58 @@
 package vegabobo.languageselector.ui.screen.main
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import vegabobo.languageselector.R
+import vegabobo.languageselector.ui.components.FilterLabel
+import vegabobo.languageselector.ui.theme.LanguageSelector
 
 @Composable
 fun SearchBarActions(
-    isDropdownVisible: Boolean = false,
-    isShowingSystemApps: Boolean = false,
-    onClickToggleDropdown: () -> Unit,
-    onToggleDropdown: () -> Unit,
+    modifier: Modifier = Modifier,
+    isShowingUserApps: Boolean,
+    isShowingSystemApps: Boolean,
+    onClickToggleUserApps: () -> Unit,
     onClickToggleSystemApps: () -> Unit,
-    onClickAbout: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.wrapContentSize(Alignment.Center)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .then(modifier),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ToolbarNormal(
-            onToggleDropdown = { onToggleDropdown() }
+        FilterLabel(
+            title = stringResource(R.string.show_user_apps),
+            onClick = { onClickToggleUserApps() },
+            isSelected = isShowingUserApps
         )
-
-        DropdownMenu(
-            expanded = isDropdownVisible,
-            onDismissRequest = { onClickToggleDropdown() }
-        ) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = if (isShowingSystemApps)
-                            stringResource(R.string.show_only_user_apps)
-                        else
-                            stringResource(R.string.show_system_apps)
-                    )
-                },
-                onClick = { onClickToggleSystemApps() }
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.about)) },
-                onClick = { onClickAbout(); onClickToggleDropdown() }
-            )
-        }
+        FilterLabel(
+            title = stringResource(R.string.show_system_apps),
+            onClick = { onClickToggleSystemApps() },
+            isSelected = isShowingSystemApps
+        )
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun ToolbarNormal(
-    onToggleDropdown: () -> Unit,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { onToggleDropdown() }) {
-            Icon(
-                imageVector = Icons.Outlined.MoreVert,
-                contentDescription = "More icon"
-            )
-        }
+private fun SearchBarActionsPreview() {
+    LanguageSelector(dynamicColor = false) {
+        SearchBarActions(
+            isShowingUserApps = true,
+            isShowingSystemApps = false,
+            onClickToggleUserApps = {},
+            onClickToggleSystemApps = {}
+        )
     }
 }

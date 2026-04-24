@@ -3,9 +3,6 @@ package vegabobo.languageselector.ui.screen.main
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Handler
-import android.os.Looper
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.superuser.Shell
@@ -19,7 +16,6 @@ import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
 import vegabobo.languageselector.BuildConfig
 import vegabobo.languageselector.RootReceivedListener
-import vegabobo.languageselector.dao.AppInfoDb
 import vegabobo.languageselector.service.UserServiceProvider
 import javax.inject.Inject
 
@@ -27,12 +23,10 @@ import javax.inject.Inject
 @HiltViewModel
 class MainScreenVm @Inject constructor(
     val app: Application,
-    appInfoDb: AppInfoDb
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MainScreenState())
     val uiState: StateFlow<MainScreenState> = _uiState.asStateFlow()
     var lastSelectedApp: AppInfo? = null
-    val dao = appInfoDb.appInfoDao()
 
     fun getIndexFromAppInfoItem(): Int {
         return _uiState.value.listOfApps.indexOfFirst { it.pkg == lastSelectedApp?.pkg }
@@ -103,89 +97,24 @@ class MainScreenVm @Inject constructor(
         }
     }
 
-    fun toggleDropdown() {
-        val newDropdownVisibility = !uiState.value.isDropdownVisible
-        _uiState.update { it.copy(isDropdownVisible = newDropdownVisibility) }
+    fun toggleSystemAppsVisibility() {
+        _uiState.update {
+            it.copy(isShowSystemAppsHome = !it.isShowSystemAppsHome)
+        }
     }
 
-    fun toggleSystemAppsVisibility() {
-        val newShowSystemApps = !uiState.value.isShowSystemAppsHome
+    fun toggleUserAppsVisibility() {
         _uiState.update {
-            it.copy(
-                isLoading = true,
-                isShowSystemAppsHome = newShowSystemApps
-            )
+            it.copy(isShowUserAppsHome = !it.isShowUserAppsHome)
         }
-        fillListOfApps()
-        toggleDropdown()
     }
 
     fun onClickProceedShizuku() {
         loadOperationMode()
     }
 
-    val searchQuery = mutableStateOf("")
-    private val handler = Handler(Looper.getMainLooper())
-    private var workRunnable: Runnable? = null
-
     fun onSearchTextFieldChange(newText: String) {
         _uiState.update { it.copy(searchTextFieldValue = newText) }
-
-        if (workRunnable != null)
-            handler.removeCallbacks(workRunnable!!)
-
-        workRunnable = Runnable { searchQuery.value = newText }
-        handler.postDelayed(workRunnable!!, 1000)
-    }
-
-    fun onSearchExpandedChange() {
-        val isExpanded = !uiState.value.isExpanded
-        _uiState.update { it.copy(isExpanded = isExpanded) }
-        if (isExpanded)
-            updateHistory()
-        else
-            _uiState.update { it.copy(searchTextFieldValue = "") }
-    }
-
-    fun onSelectedLabelChange(label: AppLabels) {
-        val lb = _uiState.value.selectLabels
-        if (lb.contains(label))
-            lb.remove(label)
-        else
-            lb.add(label)
-    }
-
-    fun updateHistory() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val appInfoList = dao.getHistory().map { it.pkg }
-            val history = appInfoList.mapNotNull { pkg ->
-                val listOfApps = _uiState.value.listOfApps
-                val idx = listOfApps.indexOfFirst { it.pkg == pkg }
-                if (idx == -1)
-                    null
-                else
-                    listOfApps[idx]
-            }
-            _uiState.value.history.clear()
-            _uiState.value.history.addAll(history)
-        }
-    }
-
-    fun addAppToHistory(ai: AppInfo) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (dao.findByPkg(ai.pkg) == null) {
-                dao.insert(ai.toAppInfoEntity())
-            }
-            dao.setLastSelected(ai.pkg, System.currentTimeMillis())
-            updateHistory()
-        }
-    }
-
-    fun onClickClear() {
-        viewModelScope.launch(Dispatchers.IO) {
-            dao.cleanLastSelectedAll()
-            updateHistory()
-        }
     }
 
     fun reloadLastSelectedItem() {
@@ -212,6 +141,5 @@ class MainScreenVm @Inject constructor(
 
     fun onClickApp(ai: AppInfo) {
         lastSelectedApp = ai
-        addAppToHistory(ai)
     }
 }

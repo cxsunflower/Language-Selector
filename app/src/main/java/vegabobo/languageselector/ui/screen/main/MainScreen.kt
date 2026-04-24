@@ -3,16 +3,23 @@ package vegabobo.languageselector.ui.screen.main
 import android.graphics.drawable.ColorDrawable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -43,6 +50,8 @@ fun MainScreen(
     mainScreenVm: MainScreenVm = hiltViewModel(),
     navigateToAppScreen: (String) -> Unit,
     navigateToAbout: () -> Unit,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
 ) {
     val uiState by mainScreenVm.uiState.collectAsState()
     val sb = remember { SnackbarHostState() }
@@ -87,12 +96,11 @@ fun MainScreen(
         lazyListState = lazyListState,
         navigateToAppScreen = navigateToAppScreen,
         navigateToAbout = navigateToAbout,
+        isDarkTheme = isDarkTheme,
+        onToggleTheme = onToggleTheme,
         onSearchTextFieldChange = { mainScreenVm.onSearchTextFieldChange(it) },
         onClickApp = { mainScreenVm.onClickApp(it) },
-        onSearchExpandedChange = { mainScreenVm.onSearchExpandedChange() },
-        onSelectedLabelChange = { mainScreenVm.onSelectedLabelChange(it) },
-        onClickClear = { mainScreenVm.onClickClear() },
-        onToggleDropdown = { mainScreenVm.toggleDropdown() },
+        onToggleUserAppsVisibility = { mainScreenVm.toggleUserAppsVisibility() },
         onToggleSystemAppsVisibility = { mainScreenVm.toggleSystemAppsVisibility() },
         onClickProceedShizuku = { mainScreenVm.onClickProceedShizuku() }
     )
@@ -104,18 +112,34 @@ fun MainScreenContent(
     uiState: MainScreenState,
     navigateToAppScreen: (String) -> Unit,
     navigateToAbout: () -> Unit,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
     onSearchTextFieldChange: (String) -> Unit,
     onClickApp: (AppInfo) -> Unit,
-    onSearchExpandedChange: () -> Unit,
-    onSelectedLabelChange: (AppLabels) -> Unit,
-    onClickClear: () -> Unit,
-    onToggleDropdown: () -> Unit,
+    onToggleUserAppsVisibility: () -> Unit,
     onToggleSystemAppsVisibility: () -> Unit,
     onClickProceedShizuku: () -> Unit,
     snackBarHostState: SnackbarHostState = remember { SnackbarHostState() },
     lazyListState: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState(),
 ) {
-    BaseScreen(snackBarHost = snackBarHostState) { paddingValues ->
+    BaseScreen(
+        title = stringResource(R.string.app_name),
+        snackBarHost = snackBarHostState,
+        actions = {
+            val themeToggleDescription = stringResource(
+                if (isDarkTheme) R.string.switch_to_light_theme else R.string.switch_to_dark_theme
+            )
+            IconButton(onClick = onToggleTheme) {
+                Icon(
+                    imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                    contentDescription = themeToggleDescription
+                )
+            }
+            TextButton(onClick = navigateToAbout) {
+                Text(text = stringResource(R.string.about))
+            }
+        }
+    ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier
@@ -129,74 +153,60 @@ fun MainScreenContent(
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .semantics { isTraversalGroup = true }
             ) {
-                AppSearchBar(
+                Column(
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .semantics { traversalIndex = 0f },
-                    placeholder = stringResource(R.string.search),
-                    onUpdatedValue = onSearchTextFieldChange,
-                    query = uiState.searchTextFieldValue,
-                    onClickApp = {
-                        onClickApp(it)
-                        navigateToAppScreen(it.pkg)
-                    },
-                    history = uiState.history,
-                    apps = uiState.listOfApps,
-                    isExpanded = uiState.isExpanded,
-                    onExpandedChange = { onSearchExpandedChange() },
-                    selectedLabels = uiState.selectLabels,
-                    onSelectedLabelsChange = onSelectedLabelChange,
-                    onClickClear = onClickClear,
-                    actions = {
-                        if (!uiState.isExpanded) {
-                            SearchBarActions(
-                                isDropdownVisible = uiState.isDropdownVisible,
-                                isShowingSystemApps = uiState.isShowSystemAppsHome,
-                                onClickToggleDropdown = onToggleDropdown,
-                                onToggleDropdown = onToggleDropdown,
-                                onClickToggleSystemApps = onToggleSystemAppsVisibility,
-                                onClickAbout = navigateToAbout
+                        .fillMaxSize()
+                        .semantics { isTraversalGroup = true }
+                ) {
+                    AppSearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics { traversalIndex = 0f },
+                        placeholder = stringResource(R.string.search),
+                        onUpdatedValue = onSearchTextFieldChange,
+                        query = uiState.searchTextFieldValue,
+                    )
+                    SearchBarActions(
+                        modifier = Modifier.semantics { traversalIndex = 0.5f },
+                        isShowingUserApps = uiState.isShowUserAppsHome,
+                        isShowingSystemApps = uiState.isShowSystemAppsHome,
+                        onClickToggleUserApps = onToggleUserAppsVisibility,
+                        onClickToggleSystemApps = onToggleSystemAppsVisibility,
+                    )
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { traversalIndex = 1f }
+                    ) {
+                        items(uiState.listOfApps.size) {
+                            val thisApp = uiState.listOfApps[it]
+                            if (!isAppTypeVisible(uiState, thisApp)) {
+                                return@items
+                            }
+                            if (!matchesSearchQuery(uiState.searchTextFieldValue, thisApp)) {
+                                return@items
+                            }
+                            AppListItem(
+                                modifier = Modifier.padding(
+                                    start = 26.dp,
+                                    end = 26.dp,
+                                    top = 4.dp,
+                                    bottom = 4.dp
+                                ),
+                                app = thisApp,
+                                onClickApp = { pkg ->
+                                    onClickApp(thisApp)
+                                    navigateToAppScreen(pkg)
+                                }
                             )
                         }
                     }
-                )
+                }
 
                 if (uiState.operationMode == OperationMode.NONE) {
                     ShizukuRequiredWarning(onClickContinue = onClickProceedShizuku)
-                }
-
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.semantics { traversalIndex = 1f }
-                ) {
-                    item {
-                        Spacer(
-                            Modifier
-                                .statusBarsPadding()
-                                .padding(top = 72.dp) /* 64 + 10 */
-                        )
-                    }
-                    items(uiState.listOfApps.size) {
-                        val thisApp = uiState.listOfApps[it]
-                        if (!uiState.isShowSystemAppsHome && thisApp.isSystemApp() && !thisApp.isModified()) {
-                            return@items
-                        }
-                        AppListItem(
-                            modifier = Modifier.padding(
-                                start = 26.dp,
-                                end = 26.dp,
-                                top = 4.dp,
-                                bottom = 4.dp
-                            ),
-                            app = thisApp,
-                            onClickApp = { pkg ->
-                                onClickApp(thisApp)
-                                navigateToAppScreen(pkg)
-                            }
-                        )
-                    }
                 }
             }
         }
@@ -229,29 +239,67 @@ private fun MainScreenPreview() {
             )
         )
     }
-    val previewHistory = remember(previewApps) {
-        mutableStateListOf(previewApps[0], previewApps[1])
-    }
-
     LanguageSelector(dynamicColor = false) {
         MainScreenContent(
             uiState = MainScreenState(
                 listOfApps = previewApps,
-                history = previewHistory,
                 operationMode = OperationMode.SHIZUKU,
                 isLoading = false,
+                isShowUserAppsHome = true,
                 isShowSystemAppsHome = true
             ),
             navigateToAppScreen = {},
             navigateToAbout = {},
+            isDarkTheme = false,
+            onToggleTheme = {},
             onSearchTextFieldChange = {},
             onClickApp = {},
-            onSearchExpandedChange = {},
-            onSelectedLabelChange = {},
-            onClickClear = {},
-            onToggleDropdown = {},
+            onToggleUserAppsVisibility = {},
             onToggleSystemAppsVisibility = {},
             onClickProceedShizuku = {}
         )
     }
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun MainScreenPermissionPreview() {
+    val previewApps = remember { mutableStateListOf<AppInfo>() }
+
+    LanguageSelector(darkTheme = true, dynamicColor = false) {
+        MainScreenContent(
+            uiState = MainScreenState(
+                listOfApps = previewApps,
+                operationMode = OperationMode.NONE,
+                isLoading = false
+            ),
+            navigateToAppScreen = {},
+            navigateToAbout = {},
+            isDarkTheme = true,
+            onToggleTheme = {},
+            onSearchTextFieldChange = {},
+            onClickApp = {},
+            onToggleUserAppsVisibility = {},
+            onToggleSystemAppsVisibility = {},
+            onClickProceedShizuku = {}
+        )
+    }
+}
+
+private fun isAppTypeVisible(uiState: MainScreenState, app: AppInfo): Boolean {
+    return if (app.isSystemApp()) {
+        uiState.isShowSystemAppsHome
+    } else {
+        uiState.isShowUserAppsHome
+    }
+}
+
+private fun matchesSearchQuery(query: String, app: AppInfo): Boolean {
+    if (query.isBlank()) {
+        return true
+    }
+
+    val normalizedQuery = query.lowercase()
+    return app.pkg.lowercase().contains(normalizedQuery) ||
+        app.name.lowercase().contains(normalizedQuery)
 }

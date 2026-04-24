@@ -1,14 +1,20 @@
 package vegabobo.languageselector
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -35,6 +41,7 @@ object ShizukuArgs {
             .version(BuildConfig.VERSION_CODE)
 }
 
+private const val PREF_DARK_THEME = "pref_dark_theme"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListener {
@@ -73,7 +80,24 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            LanguageSelector { Navigation() }
+            val systemDarkTheme = isSystemInDarkTheme()
+            val themePreferences = remember {
+                getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+            }
+            var isDarkTheme by remember {
+                // 首次启动沿用系统主题，用户手动切换后再使用持久化偏好。
+                mutableStateOf(themePreferences.getBoolean(PREF_DARK_THEME, systemDarkTheme))
+            }
+            LanguageSelector(darkTheme = isDarkTheme) {
+                Navigation(
+                    isDarkTheme = isDarkTheme,
+                    onToggleTheme = {
+                        val nextTheme = !isDarkTheme
+                        isDarkTheme = nextTheme
+                        themePreferences.edit().putBoolean(PREF_DARK_THEME, nextTheme).apply()
+                    }
+                )
+            }
         }
 
         if (Shizuku.pingBinder() && savedInstanceState == null) {
