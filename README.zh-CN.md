@@ -9,6 +9,7 @@ Language Selector 不会翻译应用。它只会请求 Android 使用指定 Loca
 <div>
 <img src="https://raw.githubusercontent.com/VegaBobo/Language-Selector/main/other/preview_1.jpg" alt="preview" width="200"/>
 <img src="https://raw.githubusercontent.com/VegaBobo/Language-Selector/main/other/preview_2.jpg" alt="preview" width="200"/>
+<img src="https://raw.githubusercontent.com/cxsunflower/Language-Selector/main/other/preview_0.jpg" alt="preview" width="200"/>
 </div>
 
 ## 使用要求
@@ -28,15 +29,13 @@ Language Selector 不会翻译应用。它只会请求 Android 使用指定 Loca
 
 ## 本次更新
 
+- 修复 RootService 绑定需要在主线程执行可能导致闪退的问题。
 - 首页加入 Material 3 Appbar，显示应用名，并在右侧放置 About 和浅色/深色主题切换按钮。
 - 新增持久化浅色/深色主题切换：首次启动跟随系统主题，手动切换后会记住用户选择。
 - 将首页搜索框简化为纯搜索输入框，并增加圆角和水平间距。
 - 将应用筛选移动到搜索框与列表之间，使用可勾选标签分别控制用户应用和系统应用。
-- 将应用列表标签 User App、System App、Modified 加入多语言资源，并改为更清晰的胶囊样式。
-- 补齐搜索占位文案和主题切换无障碍文案的多语言翻译。
+- 将应用列表标签 User App、System App、Modified 加入多语言资源，并改为更清晰的胶囊样式，补齐搜索占位文案和主题切换无障碍文案的多语言翻译。
 - 改进 Compose Preview，并修复无固有尺寸 Drawable 导致的预览崩溃。
-- 修复 RootService 绑定需要在主线程执行的问题。
-- 忽略本地 `.codex` 工作区入口。
 
 ## 使用方式
 

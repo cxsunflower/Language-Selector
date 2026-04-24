@@ -9,6 +9,7 @@ Language Selector does not translate apps. It only asks Android to launch an app
 <div>
 <img src="https://raw.githubusercontent.com/VegaBobo/Language-Selector/main/other/preview_1.jpg" alt="preview" width="200"/>
 <img src="https://raw.githubusercontent.com/VegaBobo/Language-Selector/main/other/preview_2.jpg" alt="preview" width="200"/>
+<img src="https://raw.githubusercontent.com/cxsunflower/Language-Selector/main/other/preview_0.jpg" alt="preview" width="200"/>
 </div>
 
 ## Requirements
@@ -28,15 +29,13 @@ Language Selector does not translate apps. It only asks Android to launch an app
 
 ## Latest Updates
 
+- Fixed a crash risk caused by binding RootService outside the main thread.
 - Added a Material 3 app bar on the home screen with the app name, About action, and a light/dark theme toggle.
 - Added persistent light/dark theme switching. The app follows the system theme on first launch and remembers manual changes afterward.
 - Simplified the home search bar into a focused search-only field with rounded corners and horizontal spacing.
 - Moved app filters between the search bar and app list, using selectable chips for user apps and system apps.
-- Localized and restyled the app list labels: User App, System App, and Modified.
-- Added missing translations for the search placeholder and theme toggle descriptions.
+- Localized and restyled the app list labels: User App, System App, and Modified, and added missing translations for the search placeholder and theme toggle descriptions.
 - Improved Compose previews and fixed preview crashes caused by drawables without intrinsic size.
-- Fixed service binding so RootService is bound from the main thread.
-- Ignored the local `.codex` workspace entry.
 
 ## Usage
 
