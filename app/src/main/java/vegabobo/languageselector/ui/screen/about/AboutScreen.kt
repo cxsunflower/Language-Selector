@@ -68,6 +68,7 @@ fun AboutScreen(
         ),
         githubTitle = stringResource(R.string.ghrepo),
         githubDescription = stringResource(R.string.view_source),
+        projectGithubDescription = stringResource(R.string.view_project_source),
         libraries = libraries.map { library ->
             AboutLibraryItem(
                 title = library.name,
@@ -77,6 +78,9 @@ fun AboutScreen(
         },
         onOpenGithub = {
             uriHandler.openUri("https://github.com/VegaBobo/Language-Selector")
+        },
+        onOpenProjectGithub = {
+            uriHandler.openUri("https://github.com/cxsunflower/Language-Selector")
         },
         onOpenLibrary = { url ->
             if (url.isNotEmpty()) {
@@ -101,8 +105,10 @@ fun AboutContent(
     versionText: String,
     githubTitle: String,
     githubDescription: String,
+    projectGithubDescription: String,
     libraries: List<AboutLibraryItem>,
     onOpenGithub: () -> Unit,
+    onOpenProjectGithub: () -> Unit,
     onOpenLibrary: (String) -> Unit,
 ) {
     val appIconBitmap = rememberDrawableBitmap(
@@ -136,10 +142,16 @@ fun AboutContent(
             }
             item {
                 Title(stringResource(id = R.string.app))
+                // 原仓库与当前项目仓库分开展示，方便用户查看对应源码。
                 PreferenceItem(
                     title = githubTitle,
                     description = githubDescription,
                     onClick = onOpenGithub
+                )
+                PreferenceItem(
+                    title = githubTitle,
+                    description = projectGithubDescription,
+                    onClick = onOpenProjectGithub
                 )
             }
             item { Title(stringResource(R.string.deps_libs)) }
@@ -187,9 +199,11 @@ private fun AboutScreenPreview() {
             appName = "Language Selector",
             versionText = "version 1.04 (5)",
             githubTitle = "GitHub repo",
-            githubDescription = "View source code",
+            githubDescription = "View VegaBobo/Language-Selector source code",
+            projectGithubDescription = "View this project's source code",
             libraries = previewLibraries,
             onOpenGithub = {},
+            onOpenProjectGithub = {},
             onOpenLibrary = {}
         )
     }

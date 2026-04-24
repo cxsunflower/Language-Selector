@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Language Selector</string>
+    <string name="app_name" translatable="false">Language Selector</string>
     <string name="app_language">App language</string>
     <string name="system_default">System default</string>
     <string name="user_languages">User languages:</string>
@@ -28,6 +28,7 @@
     <string name="app">Application</string>
     <string name="ghrepo">GitHub repo</string>
     <string name="view_source">View source code</string>
+    <string name="view_project_source">View this project\'s source code</string>
     <string name="loading">Loading…</string>
     <string name="unavailable">Unavailable</string>
     <string name="warning">Warning</string>

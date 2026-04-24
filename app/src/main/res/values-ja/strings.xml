@@ -28,6 +28,7 @@
     <string name="app">アプリケーション</string>
     <string name="ghrepo">GitHub リポジトリ</string>
     <string name="view_source">ソースコードを表示</string>
+    <string name="view_project_source">このプロジェクトのソースコードを表示</string>
     <string name="loading">読み込み中…</string>
     <string name="unavailable">利用できません</string>
     <string name="warning">警告</string>
